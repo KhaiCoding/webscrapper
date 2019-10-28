@@ -19,24 +19,31 @@ def extract_indeed_pages():
     return max_page
 
 
-def extract_indeed_jobs(last_page):
-    jobs = []
+# jobs1 'html' = jobs2 'result'
+def extract_indeed_jobs1(html):
+    title = (html.find("div", {"class": "title"})).find("a")["title"]
+    # Indeed not always provide Company name link - issue
+    company = html.find("span", {"class": "company"})
+    company_link = company.find("a")
+    if company_link is not None:
+        # make string : To remove blank in company name
+        company = str(company_link.string)
+    else:
+        company = str(company.string)
+    company = company.strip()
+    location = html.find("div", {"class": "recJobLoc"})["data-rc-loc"]
+    print(location)
+    return {'title': title, 'company': company, 'location': location}
 
+
+def extract_indeed_jobs2(last_page):
+    jobs = []
     # for page in range(last_page):
     python_result = requests.get(f"{PYTHON_URL}&start={0*LIMIT}")
     python_soup = BeautifulSoup(python_result.text, 'html.parser')
     python_results = python_soup.find_all(
         "div", {"class": "jobsearch-SerpJobCard"})
     for result in python_results:
-        title = (result.find("div", {"class": "title"})).find("a")["title"]
-        # Indeed not always provide Company name link - issue
-        company = result.find("span", {"class": "company"})
-        company_link = company.find("a")
-        if company_link is not None:
-            # make string : To remove blank in company name
-            company = str(company_link.string)
-        else:
-            company = str(company.string)
-        company = company.strip()
-        print(company)
+        job = extract_indeed_jobs1(result)
+        jobs.append(job)
     return jobs
