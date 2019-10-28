@@ -29,6 +29,14 @@ def extract_indeed_jobs(last_page):
         "div", {"class": "jobsearch-SerpJobCard"})
     for result in python_results:
         title = (result.find("div", {"class": "title"})).find("a")["title"]
-        print(title)
-        # jobs.append(title)
+        # Indeed not always provide Company name link - issue
+        company = result.find("span", {"class": "company"})
+        company_link = company.find("a")
+        if company_link is not None:
+            # make string : To remove blank in company name
+            company = str(company_link.string)
+        else:
+            company = str(company.string)
+        company = company.strip()
+        print(company)
     return jobs
